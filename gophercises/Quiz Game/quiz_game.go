@@ -7,6 +7,7 @@ import (
 	"flag"
 	"time"
 	"strings"
+	"math/rand"
  )
 
 
@@ -90,12 +91,25 @@ func quiz_game(data [][]string, duration int) (correct int) {
     return correct
 }
 
+func randomise_slice(slc [][]string) ([][]string){
+
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	ret := make([][]string, len(slc))
+	perm := r.Perm(len(slc))
+
+	for i, randIndex := range perm {
+	  ret[i] = slc[randIndex]
+	}
+
+	return ret
+}
 
 func main() {
 	// args
 	// flag name, default value, help string
 	file_name := flag.String("file", "problems.csv", "Problem file name. Default: problems.csv")
 	time := flag.Int("time", 30, "Quiz time limit. Default: 30 (seconds)")
+	random := flag.Bool("random", false, "Randomises order of questions. Default: false")
 
 	/*
 	Or:
@@ -107,6 +121,11 @@ func main() {
 
 	// the flag returns a pointer, so need to use * to get the actual value. Uni C flashbacks. Oh lord.
 	data := parse_csv(*file_name)
+
+	// Shuffle if set
+	if *random {
+		data = randomise_slice(data)
+	}
 
 	// Tracking for correct / incorrect values
 	correct := quiz_game(data, *time)
