@@ -4,9 +4,9 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"strconv"
 	"flag"
 	"time"
+	"strings"
  )
 
 
@@ -30,10 +30,15 @@ import (
 	return
 }
 
+func clean_string(str string) (ret string) {
+	ret = strings.ToLower(strings.TrimSpace(str))
+	return
+}
+
 func quiz_game(data [][]string, duration int) (correct int) {
 
     // Create a channel to receive user input
-    userInput := make(chan int)
+    userInput := make(chan string)
     defer close(userInput)
 
     // Create a channel to receive timeout signal
@@ -54,17 +59,13 @@ func quiz_game(data [][]string, duration int) (correct int) {
         // Print question
         fmt.Printf("%s\n", row[0])
 
-        // Convert expected answer to an integer
-        ans, err := strconv.Atoi(row[1])
-        if err != nil {
-            panic(err)
-        }
+		ans := clean_string(row[1])
 
         // Prompt user for input
         go func() {
-            var user_input int
+            var user_input string
             fmt.Scanln(&user_input)
-            userInput <- user_input
+            userInput <- clean_string(user_input)
         }()
 
         // Wait for user input or timeout
@@ -91,9 +92,11 @@ func quiz_game(data [][]string, duration int) (correct int) {
 
 
 func main() {
-
+	// args
+	// flag name, default value, help string
 	file_name := flag.String("file", "problems.csv", "Problem file name. Default: problems.csv")
-	time := flag.Int("time", 5, "Quiz time limit. Default: 30 (seconds)")
+	time := flag.Int("time", 30, "Quiz time limit. Default: 30 (seconds)")
+
 	/*
 	Or:
 	    var file_name string
@@ -102,6 +105,7 @@ func main() {
 
 	flag.Parse() // Need to call this to get the actual flags in
 
+	// the flag returns a pointer, so need to use * to get the actual value. Uni C flashbacks. Oh lord.
 	data := parse_csv(*file_name)
 
 	// Tracking for correct / incorrect values
