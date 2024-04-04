@@ -38,27 +38,24 @@ func camelcase(s string) int32 {
 }
 
 func caesarCipher(s string, k int32) string {
-    // Write your code here
-
 	var res string
 
 	for _, char := range s {
 		if !unicode.IsLetter(char) {
 			res += string(char)
-		} else {
-
-			new_val := char+k
-
-			if new_val > 'z' {
-				new_val = new_val - 26
-			}
-
-			res += (string(new_val))
+			continue
 		}
 
+		var base int32
+		if unicode.IsLower(char) {
+			base = 'a'
+		} else {
+			base = 'A'
+		}
 
-	} 
+		newVal := base + ((int32(char) - base + k) % 26)
+		res += string(newVal)
+	}
 
 	return res
-
 }
